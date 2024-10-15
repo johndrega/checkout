@@ -4938,14 +4938,23 @@ class Context {
         this.payload = {};
         if (process.env.GITHUB_EVENT_PATH) {
             if ((0, fs_1.existsSync)(process.env.GITHUB_EVENT_PATH)) {
-                let datetime1 = new Date().getTime();
-                let datetime2 = datetime1+10000;
+                const firstRead = (0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' });
+                const secondRead = (0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' });
 
-                while(datetime1<datetime2) {
-                    datetime1 = new Date().getTime();
+                if (firstRead !== secondRead) {
+                    console.log("There is a difference.");
                 }
 
-                this.payload = JSON.parse((0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' }));
+                try {
+                    firstParsed = JSON.parse(firstRead);
+                    console.log("First parsed");
+                } catch (error) {
+                    console.log("Parsing the first has errored");
+                }
+
+
+                console.log("Parsing the second read now");
+                this.payload = JSON.parse(secondRead);
             }
             else {
                 const path = process.env.GITHUB_EVENT_PATH;
