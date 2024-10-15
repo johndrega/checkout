@@ -4934,6 +4934,10 @@ class Context {
      * Hydrate the context from the environment
      */
     constructor() {
+        console.error();
+        const traceId = crypto.randomUUID();
+        const trace = (msg) => console.log(`[${traceId}]   ${msg}`);
+
         var _a, _b, _c;
         this.payload = {};
         if (process.env.GITHUB_EVENT_PATH) {
@@ -4942,54 +4946,25 @@ class Context {
                 const secondRead = (0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' });
 
                 if (firstRead !== secondRead) {
-                    console.error("There is a difference.");
-
-                    console.error();
-                    console.error();
-                    console.error();
-
-                    console.error(firstRead);
-
-                    console.error();
-                    console.error();
-                    console.error();
-
-                    console.error(secondRead);
-
-                    console.error();
-                    console.error();
-                    console.error();
+                    trace("The reads are different in the first check");
                 } else {
-                    console.error("The reads are the same");
+                    trace("The reads are the same in the first check");
                 }
 
                 try {
-                    firstParsed = JSON.parse(firstRead);
-                    console.error("First parsed");
+                    const firstParsed = JSON.parse(firstRead);
+                    trace("The first read parsed successfully");
                 } catch (error) {
-                    console.error("Parsing the first has errored");
-                    console.error(firstRead !== secondRead ? "The reads are different" : "The reads are the same, so why fail to parse?"); 
-
-                    console.error();
-                    console.error();
-                    console.error();
-
-                    console.error(firstRead);
-
-                    console.error();
-                    console.error();
-                    console.error();
-
-                    console.error(secondRead);
-
-                    console.error();
-                    console.error();
-                    console.error();
+                    console.error(error);
+                    trace("Parsing the first has errored");
+                    trace(firstRead !== secondRead ? "The reads are different" : "The reads are the same, so why fail to parse?");
+                    trace(`First read length: ${firstRead.length}`);
+                    trace(`Second read length: ${secondRead.length}`);
                 }
 
-
-                console.error("Parsing the second read now");
+                trace("Parsing the second read now");
                 this.payload = JSON.parse(secondRead);
+                console.error();
             }
             else {
                 const path = process.env.GITHUB_EVENT_PATH;
