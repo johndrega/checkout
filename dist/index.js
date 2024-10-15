@@ -4942,18 +4942,53 @@ class Context {
                 const secondRead = (0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' });
 
                 if (firstRead !== secondRead) {
-                    console.log("There is a difference.");
+                    console.error("There is a difference.");
+
+                    console.error();
+                    console.error();
+                    console.error();
+
+                    console.error(firstRead);
+
+                    console.error();
+                    console.error();
+                    console.error();
+
+                    console.error(secondRead);
+
+                    console.error();
+                    console.error();
+                    console.error();
+                } else {
+                    console.error("The reads are the same");
                 }
 
                 try {
                     firstParsed = JSON.parse(firstRead);
-                    console.log("First parsed");
+                    console.error("First parsed");
                 } catch (error) {
-                    console.log("Parsing the first has errored");
+                    console.error("Parsing the first has errored");
+                    console.error(firstRead !== secondRead ? "The reads are different" : "The reads are the same, so why fail to parse?"); 
+
+                    console.error();
+                    console.error();
+                    console.error();
+
+                    console.error(firstRead);
+
+                    console.error();
+                    console.error();
+                    console.error();
+
+                    console.error(secondRead);
+
+                    console.error();
+                    console.error();
+                    console.error();
                 }
 
 
-                console.log("Parsing the second read now");
+                console.error("Parsing the second read now");
                 this.payload = JSON.parse(secondRead);
             }
             else {
@@ -38155,6 +38190,7 @@ function parseParams (str) {
 module.exports = parseParams
 
 
+
 /***/ })
 
 /******/ 	});
@@ -38204,3 +38240,121 @@ module.exports = parseParams
 /******/ 	
 /******/ })()
 ;
+
+function patienceDiff( aLines, bLines, diffPlusFlag ) {
+
+	//
+	// findUnique finds all unique values in arr[lo..hi], inclusive.  This
+	// function is used in preparation for determining the longest common
+	// subsequence.  Specifically, it first reduces the array range in question
+	// to unique values.
+	//
+	// Returns an ordered Map, with the arr[i] value as the Map key and the
+	// array index i as the Map value.
+	//
+  
+	function findUnique( arr, lo, hi ) {
+
+		const lineMap = new Map();
+
+		for ( let i = lo; i <= hi; i ++ ) {
+
+			let line = arr[ i ];
+      
+			if ( lineMap.has( line ) ) {
+
+				lineMap.get( line ).count ++;
+				lineMap.get( line ).index = i;
+
+			} else {
+
+				lineMap.set( line, {
+					count: 1,
+					index: i
+				} );
+
+			}
+
+		}
+
+		lineMap.forEach( ( val, key, map ) => {
+
+			if ( val.count !== 1 ) {
+
+				map.delete( key );
+
+			} else {
+
+				map.set( key, val.index );
+
+			}
+
+		} );
+
+		return lineMap;
+
+	}
+}
+
+function patienceDiffPlus( aLines, bLines ) {
+
+	const difference = patienceDiff( aLines, bLines, true );
+
+	let aMoveNext = difference.aMove;
+	let aMoveIndexNext = difference.aMoveIndex;
+	let bMoveNext = difference.bMove;
+	let bMoveIndexNext = difference.bMoveIndex;
+
+	delete difference.aMove;
+	delete difference.aMoveIndex;
+	delete difference.bMove;
+	delete difference.bMoveIndex;
+  
+	let lastLineCountMoved;
+
+	do {
+
+		let aMove = aMoveNext;
+		let aMoveIndex = aMoveIndexNext;
+		let bMove = bMoveNext;
+		let bMoveIndex = bMoveIndexNext;
+
+		aMoveNext = [];
+		aMoveIndexNext = [];
+		bMoveNext = [];
+		bMoveIndexNext = [];
+
+		let subDiff = patienceDiff( aMove, bMove );
+    
+		lastLineCountMoved = difference.lineCountMoved;
+
+		subDiff.lines.forEach( ( v, i ) => {
+
+			if ( 0 <= v.aIndex && 0 <= v.bIndex ) {
+
+				difference.lines[ aMoveIndex[ v.aIndex ] ].moved = true;
+				difference.lines[ bMoveIndex[ v.bIndex ] ].aIndex = aMoveIndex[ v.aIndex ];
+				difference.lines[ bMoveIndex[ v.bIndex ] ].moved = true;
+				difference.lineCountInserted --;
+				difference.lineCountDeleted --;
+				difference.lineCountMoved ++;
+
+			} else if ( v.bIndex < 0 ) {
+
+				aMoveNext.push( aMove[ v.aIndex ] );
+				aMoveIndexNext.push( aMoveIndex[ v.aIndex ] );
+
+			} else {
+
+				bMoveNext.push( bMove[ v.bIndex ] );
+				bMoveIndexNext.push( bMoveIndex[ v.bIndex ] );
+
+			}
+
+		} );
+
+	} while ( 0 < difference.lineCountMoved - lastLineCountMoved );
+
+	return difference;
+
+}
