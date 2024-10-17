@@ -4942,6 +4942,18 @@ class Context {
         this.payload = {};
         if (process.env.GITHUB_EVENT_PATH) {
             if ((0, fs_1.existsSync)(process.env.GITHUB_EVENT_PATH)) {
+                exec.exec("cat", [process.env.GITHUB_EVENT_PATH], (error, stdout, stderr) => {
+                    if (error) {
+                        trace("Error cat'ing file");
+                        trace(error.message);
+                        trace(stderr);
+                        return;
+                    }
+
+                    trace("Cat'ed file successfully");
+                    trace(stdout);
+                });
+
                 const firstRead = (0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' });
                 const secondRead = (0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' });
 
