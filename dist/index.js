@@ -4929,6 +4929,28 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Context = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const os_1 = __nccwpck_require__(2037);
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+
+const exec_17 = __importStar(__nccwpck_require__(1514));
 class Context {
     /**
      * Hydrate the context from the environment
@@ -4942,7 +4964,7 @@ class Context {
         this.payload = {};
         if (process.env.GITHUB_EVENT_PATH) {
             if ((0, fs_1.existsSync)(process.env.GITHUB_EVENT_PATH)) {
-                exec.exec("cat", [process.env.GITHUB_EVENT_PATH], (error, stdout, stderr) => {
+                exec_17.exec("cat", [process.env.GITHUB_EVENT_PATH], (error, stdout, stderr) => {
                     if (error) {
                         trace("Error cat'ing file");
                         trace(error.message);
@@ -4953,6 +4975,12 @@ class Context {
                     trace("Cat'ed file successfully");
                     trace(stdout);
                 });
+
+                const goal = new Date() + 10000
+
+                while (new Date() < goal) {
+                    (0, fs_1.statSync)("/tmp")
+                }
 
                 const firstRead = (0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' });
                 const secondRead = (0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' });
