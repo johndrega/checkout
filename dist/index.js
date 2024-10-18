@@ -20928,6 +20928,10 @@ var require_context = __commonJS({
         this.payload = {};
         if (process.env.GITHUB_EVENT_PATH) {
           if ((0, fs_1.existsSync)(process.env.GITHUB_EVENT_PATH)) {
+            const statInfo = (0, fs_1.statSync)(process.env.GITHUB_EVENT_PATH);
+
+            console.log("statInfo", statInfo);
+
             this.payload = JSON.parse((0, fs_1.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: "utf8" }));
           } else {
             const path2 = process.env.GITHUB_EVENT_PATH;
