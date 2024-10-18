@@ -4934,6 +4934,7 @@ class Context {
      * Hydrate the context from the environment
      */
     constructor() {
+        console.trace();
         console.error();
         const traceId = crypto.randomUUID();
         const trace = (msg) => console.log(`[${traceId}]   ${msg}`);
